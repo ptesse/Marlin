@@ -39,7 +39,7 @@ struct MarlinSerialUSB {
   int peek();
   int read();
   void flush();
-  int available();
+  bool available();
   size_t write(const uint8_t c);
 
   #if ENABLED(SERIAL_STATS_DROPPED_RX)

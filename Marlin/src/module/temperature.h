@@ -210,11 +210,7 @@ struct PIDHeaterInfo : public HeaterInfo {
   typedef temp_info_t probe_info_t;
 #endif
 #if HAS_HEATED_CHAMBER
-  #if ENABLED(PIDTEMPCHAMBER)
-    typedef struct PIDHeaterInfo<PID_t> chamber_info_t;
-  #else
-    typedef heater_info_t chamber_info_t;
-  #endif
+  typedef heater_info_t chamber_info_t;
 #elif HAS_TEMP_CHAMBER
   typedef temp_info_t chamber_info_t;
 #endif
@@ -419,7 +415,7 @@ class Temperature {
 
     #if HAS_HEATED_CHAMBER
       TERN_(WATCH_CHAMBER, static chamber_watch_t watch_chamber);
-      TERN(PIDTEMPCHAMBER,,static millis_t next_chamber_check_ms);
+      static millis_t next_chamber_check_ms;
       #ifdef CHAMBER_MINTEMP
         static int16_t mintemp_raw_CHAMBER;
       #endif
@@ -630,10 +626,6 @@ class Temperature {
             , const bool click_to_cancel=false
           #endif
         );
-
-        #if ENABLED(WAIT_FOR_HOTEND)
-          static void wait_for_hotend_heating(const uint8_t target_extruder);
-        #endif
       #endif
 
       FORCE_INLINE static bool still_heating(const uint8_t e) {
@@ -759,11 +751,6 @@ class Temperature {
      * Perform auto-tuning for hotend or bed in response to M303
      */
     #if HAS_PID_HEATING
-
-      #if ANY(PID_DEBUG, PID_BED_DEBUG, PID_CHAMBER_DEBUG)
-        static bool pid_debug_flag;
-      #endif
-
       static void PID_autotune(const float &target, const heater_id_t heater_id, const int8_t ncycles, const bool set_result=false);
 
       #if ENABLED(NO_FAN_SLOWING_IN_PID_TUNING)
@@ -839,9 +826,11 @@ class Temperature {
 
     static void checkExtruderAutoFans();
 
-    TERN_(HAS_HOTEND,     static float get_pid_output_hotend(const uint8_t e));
-    TERN_(PIDTEMPBED,     static float get_pid_output_bed());
-    TERN_(PIDTEMPCHAMBER, static float get_pid_output_chamber());
+    static float get_pid_output_hotend(const uint8_t e);
+
+    TERN_(PIDTEMPBED, static float get_pid_output_bed());
+
+    TERN_(HAS_HEATED_CHAMBER, static float get_pid_output_chamber());
 
     static void _temp_error(const heater_id_t e, PGM_P const serial_msg, PGM_P const lcd_msg);
     static void min_temp_error(const heater_id_t e);
