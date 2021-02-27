@@ -52,7 +52,9 @@ void GcodeSuite::M118() {
     while (*p == ' ') ++p;
   }
 
-  PORT_REDIRECT(WITHIN(port, 0, NUM_SERIAL) ? (port ? SERIAL_PORTMASK(port - 1) : SERIAL_ALL) : multiSerial.portMask);
+  #if HAS_MULTI_SERIAL
+    PORT_REDIRECT(WITHIN(port, 0, NUM_SERIAL) ? (port ? _BV(port - 1) : SERIAL_ALL) : multiSerial.portMask);
+  #endif
 
   if (hasE) SERIAL_ECHO_START();
   if (hasA) SERIAL_ECHOPGM("//");
